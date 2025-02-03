@@ -1,12 +1,11 @@
 selenium==4.13.0
 urllib3==1.26.7
 beautifulsoup4==4.12.2
-psycopg2==2.9.9
+psycopg2-binary==2.9.9
 jsonlines==3.1.0
-logging==0.4.9.6
 requests==2.26.0
 requests-file==1.5.1
 requests-toolbelt==1.0.0
-repsonses==0.18.0
+responses==0.18.0
 selectolax==0.3.21
 colorama==0.4.6

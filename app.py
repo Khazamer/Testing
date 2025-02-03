@@ -66,6 +66,37 @@ def removePic(picture_id):
         print("The file: " + picPath + " does not exist")
 '''
 
+def getOnlineStuff():
+    # Regular search:
+    """
+    options = ChromeOptions()
+    #options.browser_version = '114' #need to get updated to main version
+    options.add_argument("--disable-notifications")
+
+    driver = webdriver.Chrome(options=options)
+    """
+    #Set up Chrome options for headless mode
+    options = ChromeOptions()
+    options.add_argument("--headless")  # Run Chrome in headless mode
+    options.add_argument("--no-sandbox")  # Bypass the sandbox (needed for Docker)
+    options.add_argument("--disable-dev-shm-usage")  # Overcome Docker’s memory limitations
+    options.add_argument("--disable-notifications")
+
+    options.browser_version = '114' # says that the chrome driver only supports version 114
+
+    # Initialize the WebDriver with the configured options
+    driver = webdriver.Chrome(options=options)
+    #driver = webdriver.Chrome()
+    driver.set_window_size(1920, 1080)
+
+    driver.get("https://www.google.com/")
+
+    time.sleep(5)
+
+    print(driver.title)
+
 link = "https://images.all-free-download.com/images/thumbjpg/test_testing_optical_265619.jpg"
 
 addPic(link)
+
+getOnlineStuff()
