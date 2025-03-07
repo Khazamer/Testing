@@ -35,24 +35,53 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*  # Clean up the apt cache
 
 # Download and install Google Chrome (or use a specific version of Chrome if needed)
+#RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+#    && dpkg -i google-chrome-stable_current_amd64.deb \
+#    && apt-get -f install -y \
+#    && rm google-chrome-stable_current_amd64.deb
+#    && echo "Google Chrome version installed."
+# / # at end of line if another line after
+
+# Install chromedriver matching the version of Google Chrome you installed
+#RUN LATEST=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) \
+#    && wget -N 	https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.98/linux64/chrome-linux64.zip \
+#    && unzip chromedriver_linux64.zip -d /usr/local/bin/ \
+#    && rm chromedriver_linux64.zip \
+#    && echo "ChromeDriver version installed."
+
+# Download and install the latest Google Chrome stable release
+#RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+#    && dpkg -i google-chrome-stable_current_amd64.deb \
+#    && apt-get -f install -y \
+#    && rm google-chrome-stable_current_amd64.deb
+
+# Install the matching ChromeDriver for the installed Chrome version
+#RUN LATEST=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) \
+#    && wget -N https://chromedriver.storage.googleapis.com/$LATEST/chromedriver_linux64.zip \
+#    && unzip chromedriver_linux64.zip -d /usr/local/bin/ \
+#    && rm chromedriver_linux64.zip
+
+# Download and install Google Chrome (or use a specific version of Chrome if needed)
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && dpkg -i google-chrome-stable_current_amd64.deb \
     && apt-get -f install -y \
     && rm google-chrome-stable_current_amd64.deb
+#    && echo "Google Chrome version installed."
+# \ # need extra for extra line
 
-# Install Selenium
-RUN pip install selenium
-
-# Install chromedriver matching the version of Google Chrome you installed
-RUN LATEST=$(curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE) \
-    && wget -N https://chromedriver.storage.googleapis.com/$LATEST/chromedriver_linux64.zip \
-    && unzip chromedriver_linux64.zip -d /usr/local/bin/ \
-    && rm chromedriver_linux64.zip
+# Install ChromeDriver from the provided URL (the ChromeDriver for version 133)
+RUN wget https://storage.googleapis.com/chrome-for-testing-public/133.0.6943.98/linux64/chrome-linux64.zip \
+    && unzip chrome-linux64.zip -d /usr/local/bin/ \
+    && rm chrome-linux64.zip
+#    && echo "ChromeDriver version installed."
 
 # Set environment variables for Chrome
 ENV DISPLAY=:99
 ENV CHROME_BIN=/usr/bin/google-chrome-stable
 ENV CHROMEDRIVER_PATH=/usr/local/bin/chromedriver
+
+# Install Selenium - not needed since requirements
+#RUN pip install selenium
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -68,9 +97,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the port the app will run on (change if necessary for your app)
 EXPOSE 5000
-
-# Run the docker up command
-CMD ["docker", "compose", "up", "-d"]
 
 # Run the application
 CMD ["python", "app.py"]

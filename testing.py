@@ -39,13 +39,128 @@ colorama.init(autoreset=True)
 
 import random
 
+def addPic(link):
+    """
+    id = random.randint(1, 10)
+
+    picPath = 'images/' + str(id) + '.jpg'
+
+    urlretrieve(link, picPath)
+
+    print(picPath)
+    """
+    picPath = 'images/' + '1' + '.jpg'
+    urlretrieve(link, picPath)
+    picPath = 'images/' + '2' + '.jpg'
+    urlretrieve(link, picPath)
+
+    dir_list = os.listdir('images/')
+    #print(len(os.listdir('images/')))
+    print(dir_list)
+    print(len(dir_list))
+
+    print("done with 1")
+
+'''
+# Remove photos - may change to non-looped depending on where its used
+def removePic(picture_id):
+    """
+    for pic in picture_ids:
+        picPath = startPath + str(pic) + ".jpg"
+        os.remove(picPath)
+    """
+    
+    picPath = startPath + str(picture_id) + ".jpg"
+    #os.remove(picPath)
+
+    if os.path.exists(picPath):
+        os.remove(picPath)
+    else:
+        print("The file: " + picPath + " does not exist")
+'''
+
+def getOnlineStuff():
+    # Regular search:
+    """
+    options = ChromeOptions()
+    #options.browser_version = '114' #need to get updated to main version
+    options.add_argument("--disable-notifications")
+
+    driver = webdriver.Chrome(options=options)
+    """
+    print("into web system")
+
+    #Set up Chrome options for headless mode
+    options = ChromeOptions()
+    options.add_argument("--headless")  # Run Chrome in headless mode
+    options.add_argument("--no-sandbox")  # Bypass the sandbox (needed for Docker)
+    options.add_argument("--disable-dev-shm-usage")  # Overcome Docker’s memory limitations
+    options.add_argument("--disable-notifications")
+
+    options.browser_version = '114' # says that the chrome driver only supports version 114
+
+    print("options done")
+
+    # Initialize the WebDriver with the configured options
+    driver = webdriver.Chrome(options=options)
+    #driver = webdriver.Chrome()
+    driver.set_window_size(1920, 1080)
+
+    print("browser setup")
+
+    driver.get("https://www.google.com/")
+
+    time.sleep(5)
+
+    print(driver.title)
+
+# testing stuff
+
+link = "https://images.all-free-download.com/images/thumbjpg/test_testing_optical_265619.jpg"
+
+#addPic(link)
+
+#print("Picture done")
+
+#getOnlineStuff()
+
+#print("online stuff done")
+
+#multithreadGoogle() # requires other stuff to work, may implement down the line
+
+"""
+with psycopg2.connect(
+        host = database_config['hostname'],
+        dbname = database_config['database name'],
+        user = database_config['username'],
+        password = database_config['pass'],
+        port = database_config['port id']
+    ) as conn:
+
+        # Create cursor object
+        with conn.cursor(cursor_factory = psycopg2.extras.DictCursor) as cur: # creates a cursor object which returns SELECT query values as dictionaries
+"""
+"""
+with psycopg2.connect(
+    host = "34.56.131.167",
+    dbname = "vehicles",
+    user = "dev_test",
+    password = "testing_time_for_now_dev",
+    port = 5432
+) as conn:
+    with conn.cursor(cursor_factory = psycopg2.extras.DictCursor) as cur:
+        # stuff goes here
+        test_q = "SELECT * FROM cars" # make cars table first and make sure to spin up db
+        cur.execute(test_q)
+        things = cur.fetchall()
+        print(things)
+"""
+
+# Testing for scrape
+
 import traceback
 
-# COLORING SCHEME
-# Magenta: Major steps/progress
-# Yellow: Settings and other control
-
-def gatherFacebook(places, settings):
+def testing1Scrape(places, settings):
     
     # Setting up the browser
     # region
@@ -83,25 +198,21 @@ def gatherFacebook(places, settings):
 
     print(f"{Fore.LIGHTMAGENTA_EX}{len(places)} tabs open and setup")
     print(f"{Fore.LIGHTYELLOW_EX}Settings")
-    print(f"{Fore.YELLOW}Clear Alerts = {settings['clear alerts']} | {Fore.YELLOW}Scroll = {settings['scroll']}")
+    print(f"{Fore.YELLOW}Clear Alerts = {settings['clear alerts']}")
+    print(f"{Fore.YELLOW}Scroll = {settings['scroll']}")
 
     driver.switch_to.window(first_tab)
     driver.close()
 
     listings = []
-    scroll_broke = False
-
-    print(f"{Fore.LIGHTMAGENTA_EX}Progress:     {Fore.YELLOW}Loaded  {Fore.RED}Alerts  {Fore.BLUE}Scrolled  {Fore.CYAN}Found  {Fore.GREEN}Real")
 
     handles = driver.window_handles
     for i, handle in enumerate(handles):
         driver.switch_to.window(handle)
 
-        progress_str = ""
-        progress_str = f"{Fore.MAGENTA}Search {i+1} of {len(handles)}:"
-        print(progress_str, end='\r')
+        print(f"{Fore.LIGHTCYAN_EX}Search {i+1} of {len(handles)}")
 
-        """ # doesn't work cuz of selenium have predefined definitions
+        """
         try:
             WebDriverWait(10, driver).until(driver.execute_script("return document.readyState") == "complete") # need to see if this works
             # doesn't work, need another system to check
@@ -120,9 +231,7 @@ def gatherFacebook(places, settings):
             time.sleep(1)
             check_timer -= 1
 
-        #print(f"{Fore.CYAN}{i+1}: Page loaded")
-        progress_str += f"  {Fore.YELLOW}\u2713"
-        print(progress_str, end='\r')
+        print(f"{Fore.CYAN}{i+1}: Page loaded")
 
         if settings["clear alerts"]: # clear the alerts
             try:
@@ -136,14 +245,9 @@ def gatherFacebook(places, settings):
             except:
                 print("no login filter")
 
-            #print(f"{Fore.CYAN}{i+1}: Alerts cleared")
-            progress_str += f"       {Fore.RED}\u2713"
-            print(progress_str, end='\r')
+            print(f"{Fore.CYAN}{i+1}: Alerts cleared")
 
             if settings["scroll"]: # scroll down the page
-                progress_str += f"    {Fore.BLUE}Scrolling"
-                print(progress_str, end='\r')
-                progress_str = progress_str[:-13]
                 try:
                     last_height = driver.execute_script("return document.body.scrollHeight")
                     while(True):
@@ -153,31 +257,11 @@ def gatherFacebook(places, settings):
                         if last_height == new_height:
                             break
                         last_height = new_height
-                    #print(f"{Fore.CYAN}{i+1}: Scrolled")
-                    progress_str += f"    {Fore.BLUE}Scrolling"
-                    print(progress_str, end='\r')
-                    progress_str = progress_str[:-13]
+                    print(f"{Fore.CYAN}{i+1}: Scrolled")
                 except:
-                    #print(f"{Fore.CYAN}{i+1}: Scroll Broke")
-                    progress_str += f"            {Fore.BLUE}X"
-                    print(progress_str, end='\r')
+                    print(f"{Fore.CYAN}{i+1}: Scroll Broke")
 
-                    scroll_broke = True
-
-                if not scroll_broke:
-                    #print(f"{Fore.CYAN}{i+1}: Scroll Done")
-                    print(progress_str, end='\r')
-                    time.sleep(5)
-                    progress_str += f"            {Fore.BLUE}\u2713"
-                    print(progress_str, end='\r')
-
-            else:
-                progress_str += f"        {Fore.BLUE}NA"
-                print(progress_str, end='\r')
-
-        else:
-            progress_str += f"       {Fore.RED}NA        {Fore.BLUE}NA"
-            print(progress_str, end='\r')
+                print(f"{Fore.CYAN}{i+1}: Scroll Done")
 
         #time.sleep(30) #x9f619 x78zum5 x1r8uery xdt5ytf x1iyjqo2 xs83m0k x1e558r4 x150jy0e x1iorvi4 xjkvuk6 xnpuxes x291uyu x1uepa24
 
@@ -189,36 +273,22 @@ def gatherFacebook(places, settings):
         file.close
 
         located = soup.find_all('div', class_='x9f619 x78zum5 x1r8uery xdt5ytf x1iyjqo2 xs83m0k x1e558r4 x150jy0e x1iorvi4 xjkvuk6 xnpuxes x291uyu x1uepa24')
-        #print(f'{Fore.CYAN}{i+1}: Num Listings Found: {len(located)}')
-
-        progress_str += f"       {Fore.CYAN}{len(located)}"
-        print(progress_str, end='\r')
+        print(f'{Fore.CYAN}{i+1}: Num Listings Found: {len(located)}')
 
         listings_temp = []
         temp_error_recall = ""
 
-        for listing in located:
+        for listing in located: # WILL NEED TO UPDATE THESE VALUES OVERTIME SO MAKE SURE TO UPDATE THEM IF YOU RUN INTO ANY ERRORS
             each = {}
-            try:
-                #url = "https://www.facebook.com" + listing.find('a', class_="x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1heor9g xkrqix3 x1sur9pj x1s688f x1lku1pv")['href']
-                url = "https://www.facebook.com" + listing.find('a')['href'] # since there is 1 a class this is an even easier solution
+            try: # curr class name: x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1heor9g xkrqix3 x1sur9pj x1s688f x1lku1pv
+                url = "https://www.facebook.com" + listing.find('a', class_="x1i10hfl xjbqb8w x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xt0psk2 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x16tdsg8 x1hl2dhg xggy1nq x1a2a7pz x1heor9g xkrqix3 x1sur9pj x1s688f x1lku1pv")['href']
                 listing_num = url[url.find("item/")+5:url.find("/?ref")]
-                #image = listing.find('img', class_='x168nmei x13lgxp2 x5pf9jr xo71vjh xt7dq6l xl1xv1r x6ikm8r x10wlt62 xh8yej3')['src']
-                image = listing.find('img')['src'] # same here since theres only 1 img class
-                '''
+                image = listing.find('img', class_='xt7dq6l xl1xv1r x6ikm8r x10wlt62 xh8yej3')['src']
                 title = listing.find('span', 'x1lliihq x6ikm8r x10wlt62 x1n2onr6').text
-                price = listing.find('span', 'x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xudqn12 x676frb x1lkfr7t x1lbecb7 x1s688f xzsf02u').text # diff on docker for some reason: x193iq5w xeuugli x13faqbe x1vvkbs x10flsy6 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x1tu3fi x3x7a5m x1lkfr7t x1lbecb7 x1s688f xzsf02u
+                price = listing.find('span', 'x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xudqn12 x676frb x1lkfr7t x1lbecb7 x1s688f xzsf02u').text
                 locationAndMiles = listing.find_all('span', 'x1lliihq x6ikm8r x10wlt62 x1n2onr6 xlyipyv xuxw1ft x1j85h84')
                 location = locationAndMiles[0].text
                 miles = locationAndMiles[1].text
-                '''
-                # we can mess with built in functionality of finding class names and attributes
-                spans = listing.find_all('span')
-                title = spans[5].text
-                price = spans[2].text
-                location = spans[8].text
-                miles = spans[10].text
-                # can also make this self healing but should be good for now
 
                 each["Listing_ID"] = listing_num
                 each["Listing URL"] = url #"https://www.facebook.com" + url
@@ -237,15 +307,11 @@ def gatherFacebook(places, settings):
                 #print(traceback.format_exc())
                 if not temp_error_recall:
                     temp_error_recall = traceback.format_exc()
-                    temp_soup = listing
                 pass
         
-        #print(f'{Fore.CYAN}{i+1}: Actual Listings Count: {len(listings_temp)}')
-        progress_str += f"    {Fore.GREEN}{len(listings_temp)}"
-        print(progress_str)
+        print(f'{Fore.CYAN}{i+1}: Actual Listings Count: {len(listings_temp)}')
         if (len(listings_temp) == 0):
             print(temp_error_recall)
-            print(temp_soup)
 
         listings += listings_temp
 
@@ -332,9 +398,138 @@ places = [
 # all places
 # erie, lancaster, morgantown
 
-gatherFacebook(places=places, settings=settings)
+#testing1Scrape(places=places, settings=settings)
 
 #driver.find_element(By.XPATH, "//div[contains(@aria-label,'Log In')]/div/div").click()
+
+# NEW IDEA
+# new url sorts by time and gets the newest cars fastest
+#"https://www.facebook.com/marketplace/pittsburgh/search?query=vehicles&radius=1&daysSinceListed=1&sortBy=creation_time_descend"
+
+# Notes
+# There is a list of all possible cars
+
+"""
+<div class="x78zum5 xdt5ytf x11tup63 x16z1lm9">
+                <div class="xwoyzhm x1rhet7l">
+                <span class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x x14z4hjw x3x7a5m xngnso2 x1qb5hxa x1xlr1w8 xzsf02u x1yc453h" dir="auto">
+                <h1 class="html-h1 xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x4uap5 x18d9i69 xkhd6sd x1vvkbs x1heor9g x1qlqyl8 x1pd3egz x1a2a7pz">
+                    <span class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 xngnso2 x1qb5hxa x1xlr1w8 xzsf02u">
+                    Vehicles Near Pittsburgh, Pennsylvania
+                    </span>
+                </h1>
+                </span>
+                </div>
+                </div>
+
+<a class="x1i10hfl x1ejq31n xd10rxx x1sy0etr x17r0tee x972fbf xcfux6l x1qhh985 xm0m39n x9f619 x1ypdohk xe8uvvx xdj266r x11i5rnm xat24cr x1mh8g0r xexx8yu x18d9i69 x16tdsg8 x1hl2dhg xggy1nq x87ps6o x1lku1pv x1a2a7pz x6s0dn4 x1tlxs6b x1g8br2z x1gn5b1j x230xth x78zum5 x1q0g3np xc9qbxq xl56j7k xn6708d x1ye3gou x1n2onr6 xh8yej3 x1qhmfi1" href="/marketplace/pittsburgh/aston-martin-db9/" role="link" tabindex="0">
+                      <span class="x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xudqn12 x3x7a5m x6prxxf xvq8zen x1s688f xzsf02u" dir="auto">
+                       <span class="x1lliihq x6ikm8r x10wlt62 x1n2onr6 xlyipyv xuxw1ft">
+                        Aston Martin Db9
+                       </span>
+                      </span>
+                      <div class="x1ey2m1c xds687c x17qophe xg01cxk x47corl x10l6tqk x13vifvy x1ebt8du x19991ni x1dhq9h x1o1ewxj x3x9cwd x1e5q0jg x13rtm0m" data-visualcompletion="ignore" role="none">
+                      </div>
+                     </a>
+"""
+
+# console test
+'''
+import time
+import sys
+
+# Function to print loading bar
+def loading_bar(progress, total, width=40):
+    # Calculate the percentage of progress
+    percentage = (progress / total)
+    
+    # Create a string of the current progress
+    num_hashes = int(percentage * width)
+    num_spaces = width - num_hashes
+    
+    # Create the loading bar string
+    bar = f"[{'#' * num_hashes}{' ' * num_spaces}] {percentage * 100:.2f}%"
+    
+    # Print the loading bar on the same line
+    sys.stdout.write('\r' + bar)
+    sys.stdout.flush()
+
+# Example usage of the loading bar
+total_steps = 100
+
+for step in range(total_steps + 1):
+    loading_bar(step, total_steps)
+    time.sleep(0.1)  # Simulate work being done
+
+print()  # Newline after loading bar completion
+'''
+'''
+import time
+import sys
+
+# Function to print loading bars
+def loading_bars(progress, total, num_bars=3, width=40):
+    # Create a string for each loading bar
+    bars = []
+    for i in range(num_bars):
+        # Calculate the percentage of progress for each bar
+        percentage = (progress + i) / total
+        num_hashes = int(percentage * width)
+        num_spaces = width - num_hashes
+        
+        # Create each loading bar
+        bar = f"[{'#' * num_hashes}{' ' * num_spaces}] {percentage * 100:.2f}%"
+        bars.append(bar)
+    
+    # Clear the screen and print the loading bars
+    sys.stdout.write('\r' + '\n'.join(bars) + '\r')
+    sys.stdout.flush()
+
+# Example usage of the loading bars
+total_steps = 100
+
+for step in range(total_steps + 1):
+    loading_bars(step, total_steps)
+    time.sleep(0.1)  # Simulate work being done
+
+print()  # Newline after loading bar completion
+'''
+
+print('\u2713 and hello there')
+print(f'{Fore.CYAN} \u2713 {Fore.WHITE} and hello there')
+temp = f"{Fore.YELLOW} hi there"
+print(temp)
+temp += f"{Fore.GREEN} yo"
+print(temp)
+print(f"{Fore.BLACK} hello")
+print(f"{Fore.BLUE} hello")
+print(f"{Fore.YELLOW} hello")
+print(f"{Fore.RED} hello")
+print(f"{Fore.GREEN} hello")
+print(f"{Fore.CYAN} hello")
+print(f"{Fore.MAGENTA} hello")
+print(f"{Fore.WHITE} hello")
+
+# CURSES
+# Useful but idk how much in this case since we will want terminal output
+# It write on its own screen so we wont see it anyways when runnign on google
+'''
+import curses
+from curses import wrapper
+
+def cursesSetup(stdscr):
+    stdscr.clear()
+
+    stdscr.addstr("hi")
+    stdscr.addstr(10, 10, "hi") # choose loc on screen
+
+    stdscr.refresh()
+    stdscr.getch()
+
+wrapper(cursesSetup)
+'''
+
+# Extras
 
 """
 TO RUN
